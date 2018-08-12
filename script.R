@@ -1,15 +1,13 @@
 library(purrr)
-library(plotly)
 library(rjstat)
 library(tidyr)
 library(httr)
-library(jsonlite)
 library(ggplot2)
 library(dplyr)
 library(gganimate)
 
-    url <- paste0("https://data.ssb.no/api/v0/en/table/09253/")
-    query <- '{
+url <- paste0("https://data.ssb.no/api/v0/en/table/09253/")
+query <- '{
   "query": [{"code": "Kjonn", "selection": { "filter": "item", "values": [ "0"] }}, 
             {"code": "StudieretningUtd", "selection": {"filter": "item", "values": ["00-99"]}},
             {"code": "FullforingVGO","selection": {"filter": "item", "values": ["5", "1", "2", "3", "4", "8", "9"]}},
@@ -19,9 +17,8 @@ library(gganimate)
     "format": "json-stat"
     }
     }'
+
 temp <- POST(url, body = query, encode = "json")
-    
-temp$status_code    
     
 if (temp$status_code == 200) {
   dfnames <- fromJSONstat(content(temp, 'text'), naming = 'id')[[1]]
@@ -30,19 +27,12 @@ if (temp$status_code == 200) {
   df = fromJSONstat(content(temp, 'text'))[[1]]
   names(df) <- idnames
 }
-names(df)
-
-names(fromJSONstat(content(temp, 'text'))[[1]])
-
-table(df$Tid)
 
 cats <- unique(df$FullforingVGO)
 lvls <-  cats[order(nchar(cats),cats)]
 
 df$FullforingVGO <- factor(df$FullforingVGO, levels = lvls)
   
-table(df$FullforingVGO)
-
 df %>% 
   mutate(year = as.integer(substr(Tid, 1, 4))) %>% 
   filter(FullforingVGO != 'Total') %>% 
